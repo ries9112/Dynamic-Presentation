@@ -1,0 +1,12 @@
+name: dynamic-presentation
+title: dynamic-presentation
+username:
+account: predictcrypto
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2297113
+bundleId: 3145589
+url: https://predictcrypto.shinyapps.io/dynamic-presentation/
+when: 1589433486.5083
+asMultiple: FALSE
+asStatic: FALSE

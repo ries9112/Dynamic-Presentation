@@ -1,0 +1,180 @@
+---
+title: "Crypto Dynamic Presentation"
+author: Try pressing "w" on your keyboard and press "o" for an overview of the slides.<br/> Use the arrows to navigate between slides and press "f" to fullscreen. <br/> [full version](https://cryptocurrencyresearch.org/).
+date: '`r paste("Last Updated:<br/>",Sys.time(),"- UTC")`'
+output: 
+  ioslides_presentation: 
+    self_contained: yes
+    css: styles.css
+runtime: shiny
+---
+
+```{r cache_all, include=FALSE}
+# Once I'm done making edits get rid of the cache by commenting out the line below
+#knitr::opts_chunk$set(cache = TRUE)
+# automatically format all the code chunks
+knitr::opts_chunk$set(tidy = TRUE)
+# THIS IS SIMPLER + PRESENTATION VERSION
+```
+
+# Introduction
+
+## Welcome to the more high-level version of the [predictive analytics example of how one could make trades on the cryptocurrency markets](https://cryptocurrencyresearch.org/).
+
+You can navigate between topics with the right and left arrow keys, and press on the down key to learn more about each topic.
+
+You can also press on the "o" key on your keyboard for an overview of the slides.
+
+Press on the down arrow key on your keyboard to learn more about the differences between this version and the [full one](https://cryptocurrencyresearch.org/).
+
+##
+This version of the coded example also updates once a day at ~11:00AM UTC with the latest cryptocurrency data and predictive models, but the focus is around giving you as much boilerplate code that can be applied to a variety of other predictive analytics problems. The [full version](https://cryptocurrencyresearch.org/) deals with issues relating specifically to the cryptocurrency markets, and these will be avoided as much as possible in this version of the example.
+
+<!-- You can navigate between topics with the right and left arrow keys, and press on the down key to learn more about each topic. -->
+
+Press on the right arrow key on your keyboard to get started.
+
+## Disclaimer
+
+Enter disclaimer here
+
+
+## Select Cryptocurrency
+
+First, choose which cryptocurrency to analyze for the rest of this presentation. The rest of the slides will change accordingly.
+
+```{r pull_data_hidden, include=F, cache=T}
+# hide and pull data first in order to keep things in most logical order
+library(PredictCrypto)
+messari <- get_crypto_data()
+# Adjust column names
+messari <- janitor::clean_names(messari)
+```
+
+
+```{r crypto_selection, echo=F}
+library(shiny)
+inputPanel(
+  selectInput("select_crypto", "Select a Cryptocurrency:", choices = unique(messari$name), multiple=F, selectize=TRUE, selected = "Ethereum")
+)
+```
+
+```{r show_messari, echo=F, message=FALSE, warning=FALSE}
+library(DT)
+renderDT({
+  datatable(head(subset(messari, name == input$select_crypto), 500),  style = "default", 
+          options = list(scrollX = TRUE, pageLength=2, lengthMenu = c(2, 3, 5)), rownames = F)
+})
+```
+
+
+
+## Visualize over time
+
+```{r var_to_visualize, echo=F}
+library(shiny)
+inputPanel(
+  selectInput("select_variable", "Variable to visualize:", choices = colnames(messari), multiple=F, selectize=TRUE, selected = "price_usd")
+)
+```
+
+
+```{r visualize_over_time, echo=F, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(janitor)
+library(anytime)
+library(rlang)
+
+# wrap with reactive environment
+renderPlot({ 
+  #Make necessary adjustments here and hide them (or give cleaned up data source):
+  # Filter data:
+  new_data <- subset(messari, name == input$select_crypto)
+  # Convert date + date/time
+  new_data$date_extracted <- anytime::anytime(new_data$date_extracted)
+  new_data$date_time_colorado_mst <- anytime::anytime(new_data$date_time_colorado_mst)
+  # Now plot the data:
+  ggplot(new_data, aes_string(x="date_extracted", y=input$select_variable)) +
+    geom_line() +
+    ggtitle(paste0(input$select_crypto, ' - ', input$select_variable, ' over time'), 
+            subtitle = paste0('Through: ', max(new_data$date_time_colorado_mst), ' - Colorado Time'))
+})
+
+```
+
+
+
+In the [full version](https://cryptocurrencyresearch.org/) many assets are modeled at once which adds a layer of complexity to things.
+
+
+
+
+
+
+
+<!-- ## Predictive Modeling -->
+
+<!-- ```{r model_to_use, echo=F} -->
+<!-- library(parsnip) -->
+<!-- inputPanel( -->
+<!--   selectInput("select_model", "Predictive Model:", choices = c('linear','XGBoost'), multiple=F, selectize=TRUE, selected = "linear") -->
+<!-- ) -->
+<!-- ``` -->
+
+<!-- Also add adjustment for # of hours offset for target -->
+
+<!-- ```{r predictive_modeling, echo=F, message=FALSE, warning=FALSE} -->
+<!-- # wrap with reactive environment -->
+<!-- renderTable({  -->
+<!--   #Make necessary adjustments here and hide them (or give cleaned up data source): -->
+<!--   # Filter data: -->
+<!--   new_data <- subset(messari, name == input$select_crypto) -->
+<!--   # Convert date + date/time -->
+<!--   new_data$date_extracted <- anytime::anytime(new_data$date_extracted) -->
+<!--   new_data$date_time_colorado_mst <- anytime::anytime(new_data$date_time_colorado_mst) -->
+
+<!--   # Prices by exchange -->
+<!--   exchange_prices <- get_prices_by_exchange() -->
+<!--   new_data <- crypto_data_join(new_data, subset(exchange_prices, Exchange == 'HitBTC'))  -->
+<!--   # Add target variable -->
+<!--   new_data <- calculate_percent_change_daily_version(new_data, 24, 'hours') -->
+
+
+<!--   # Train/Test split -->
+<!--   #new_data <- cross_validate_crypto_5_more_data(new_data) -->
+
+<!--   #new_data -->
+
+<!-- }) -->
+<!-- ``` -->
+
+
+
+
+
+
+
+<!-- ## TO-DO: -->
+
+<!-- - Data prep section -->
+
+<!-- - User selection for what type of model to make -->
+
+<!-- - New data source with prices filled in by exchange to avoid having to explain -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
